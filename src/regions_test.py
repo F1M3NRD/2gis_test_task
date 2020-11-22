@@ -8,12 +8,18 @@ def test_example(regions_api):
     assert number_of_regions == 22, f"Count of regions is wrong: {number_of_regions}"
 
 
+@pytest.mark.parametrize("request_type", ['post', 'put', 'delete'])
+def test_not_get_requests(regions_api, request_type):
+    response = getattr(regions_api, request_type)()
+    assert response.status_code == 405, f"Something wrong with response status code of {request_type} request"
+
+
 @pytest.mark.parametrize("page_size", [5, 10, 15])
 def test_total_number_of_unique_regions(regions_api, page_size):
 
     all_regions = set()
-
-    for page in range(1, 10):
+    page = 1
+    while True:
         get_regions = regions_api.get(params={
             'page': page,
             'page_size': page_size
@@ -23,33 +29,35 @@ def test_total_number_of_unique_regions(regions_api, page_size):
         if len(list_of_regions) == 0:
             break
         for region in list_of_regions:
-            for key, value in region.items():
-                if key == 'name':
-                    all_regions.add(value)
+            all_regions.add(region['id'])
+        page += 1
 
     assert len(all_regions) == 21, f"Total number of unique regions is wrong: {len(all_regions)}"
 
 
-@pytest.mark.parametrize("page_size, result", [(5, 26), (10, 23), (15, 22)])
-def test_total_number_of_regions(regions_api, page_size, result):
+@pytest.mark.parametrize("page_size,", [5, 10, 15])
+def test_total_number_of_regions(regions_api, page_size,):
 
     all_regions = []
+    page = 1
+    total_number_of_regions_in_response = None
 
-    for page in range(1, 10):
+    while True:
         get_regions = regions_api.get(params={
             'page': page,
             'page_size': page_size
         })
         assert get_regions.status_code == 200, f"Response status code is not 200: {get_regions.status_code}"
         list_of_regions = get_regions.json()['items']
+        total_number_of_regions_in_response = get_regions.json()['total']
         if len(list_of_regions) == 0:
             break
         for region in list_of_regions:
-            for key, value in region.items():
-                if key == 'name':
-                    all_regions.append(value)
+            all_regions.append(region['name'])
+        page += 1
 
-    assert len(all_regions) == result, f"Total number of regions is wrong: {len(all_regions)}"
+    assert len(all_regions) == total_number_of_regions_in_response, \
+        f"Total number of regions is wrong: {len(all_regions)}"
 
 
 def test_default_number_of_regions_on_1_page(regions_api):
@@ -100,9 +108,8 @@ def test_country_code_param_positive(regions_api, country_code):
         all_regions_on_page = response.json()['items']
         for region in all_regions_on_page:
             country_code_in_response = region['country']
-            for key, value in country_code_in_response.items():
-                if key == 'code':
-                    assert value == country_code, f"Region's country is not equal to required: {value}"
+            assert country_code_in_response['code'] == country_code, \
+                f"Region's country is not equal to required: {country_code_in_response['code']}"
 
 
 @pytest.mark.parametrize("country_code", ['', ' ', 'rU', 'Ru', 'RU', 'kG', 'Kg', 'KG', 'kZ', 'Kz', 'KZ', 'cZ', 'Cz',
@@ -169,7 +176,6 @@ def test_page_size_param_negative(regions_api, page_size,):
     })
     assert response.status_code == 200, f"Response status code is not 200: {response.status_code}"
     error_response_body = response.json()['error']['message']
-
     assert error_response_body == "Параметр 'page_size' может быть одним из следующих значений: 5, 10, 15", \
         f"Error message in response is different: {error_response_body}"
 
