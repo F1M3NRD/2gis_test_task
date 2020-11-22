@@ -32,6 +32,7 @@ git clone https://github.com/F1M3NRD/2gis_test_task.git
 
 Requirements:
 ```
+python 3.8
 requests
 pytest
 ```
