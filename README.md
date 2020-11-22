@@ -24,15 +24,16 @@ docker run -it 2gis_test_task
 
 ## Common usage
 
-Requirements:
-```bash
-pip install -r requirements.txt
-```
-
 Clone repository:
 
 ```
 git clone https://github.com/F1M3NRD/2gis_test_task.git
+```
+
+Requirements:
+```
+requests
+pytest
 ```
 
 Navigate to root directory (2gis_test_task) and execute:
