@@ -24,13 +24,13 @@ docker run -it 2gis_test_task
 
 ## Common usage
 
-Requirements
+Requirements:
 ```python
 import requests
 import pytest
 ```
 
-Clone repository
+Clone repository:
 
 ```
 git clone https://github.com/F1M3NRD/2gis_test_task.git
