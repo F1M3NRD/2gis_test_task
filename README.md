@@ -24,6 +24,12 @@ docker run -it 2gis_test_task
 
 ## Common usage
 
+Requirements
+```python
+import requests
+import pytest
+```
+
 Clone repository
 
 ```
